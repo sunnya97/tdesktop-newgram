@@ -81,7 +81,7 @@ void TaskStream::handleReadyRead() {
 		const auto payload = ExtractDataPayload(frame);
 		if (payload.isEmpty()) continue;
 		if (auto parsed = ParseAgentEvent(payload); parsed.has_value()) {
-			emit event(*parsed);
+			Q_EMIT agentEvent(*parsed);
 		}
 	}
 }
@@ -94,7 +94,7 @@ void TaskStream::handleFinished() {
 		const auto payload = ExtractDataPayload(frame);
 		if (!payload.isEmpty()) {
 			if (auto parsed = ParseAgentEvent(payload); parsed.has_value()) {
-				emit event(*parsed);
+				Q_EMIT agentEvent(*parsed);
 			}
 		}
 	}
@@ -104,9 +104,9 @@ void TaskStream::handleFinished() {
 	_reply = nullptr;
 	_done = true;
 	if (error == QNetworkReply::NoError) {
-		emit finished();
+		Q_EMIT finished();
 	} else {
-		emit failed(QString("network error: %1").arg(error));
+		Q_EMIT failed(QString("network error: %1").arg(error));
 	}
 }
 
@@ -143,7 +143,7 @@ TaskStream *SidecarClient::startTask(
 	auto *stream = new TaskStream(this);
 	if (!isConfigured()) {
 		QMetaObject::invokeMethod(stream, [stream] {
-			emit stream->failed(QStringLiteral("sidecar not configured yet"));
+			Q_EMIT stream->failed(QStringLiteral("sidecar not configured yet"));
 		}, Qt::QueuedConnection);
 		return stream;
 	}

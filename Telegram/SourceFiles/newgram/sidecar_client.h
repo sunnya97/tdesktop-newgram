@@ -27,8 +27,8 @@ public:
 	explicit TaskStream(QObject *parent = nullptr);
 	~TaskStream() override;
 
-signals:
-	void event(Newgram::AgentEvent event);
+Q_SIGNALS:
+	void agentEvent(Newgram::AgentEvent event);
 	void finished();
 	void failed(QString reason);
 

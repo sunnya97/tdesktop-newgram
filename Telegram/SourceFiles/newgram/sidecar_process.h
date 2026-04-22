@@ -34,7 +34,7 @@ public:
 	[[nodiscard]] QString baseUrl() const { return _baseUrl; }
 	[[nodiscard]] QString token() const { return _token; }
 
-signals:
+Q_SIGNALS:
 	void ready(QString baseUrl, QString token);
 	void died(int exitCode, QString stderrTail);
 	void logLine(QString line);

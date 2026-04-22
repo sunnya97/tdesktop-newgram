@@ -37,7 +37,7 @@ void SidecarProcess::start() {
 		// Dev override: trust the manually-run sidecar.
 		_baseUrl = _settings.manualUrl;
 		_ready = true;
-		emit ready(_baseUrl, _token);
+		Q_EMIT ready(_baseUrl, _token);
 		return;
 	}
 	launchProcess();
@@ -62,7 +62,7 @@ void SidecarProcess::stop() {
 
 void SidecarProcess::launchProcess() {
 	if (_settings.sidecarDir.isEmpty()) {
-		emit died(-1, QStringLiteral("sidecar dir not resolved"));
+		Q_EMIT died(-1, QStringLiteral("sidecar dir not resolved"));
 		return;
 	}
 
@@ -95,7 +95,7 @@ void SidecarProcess::launchProcess() {
 		const auto data = _proc->readAllStandardError();
 		for (const auto &chunk : data.split('\n')) {
 			if (!chunk.isEmpty()) {
-				emit logLine(QString::fromUtf8(chunk));
+				Q_EMIT logLine(QString::fromUtf8(chunk));
 			}
 		}
 	});
@@ -104,7 +104,7 @@ void SidecarProcess::launchProcess() {
 
 	_proc->start();
 	if (!_proc->waitForStarted(5000)) {
-		emit died(-1, QStringLiteral("sidecar failed to start (uv missing?)"));
+		Q_EMIT died(-1, QStringLiteral("sidecar failed to start (uv missing?)"));
 		_proc->deleteLater();
 		_proc = nullptr;
 		scheduleRestart();
@@ -122,11 +122,11 @@ void SidecarProcess::handleStdoutLine(const QByteArray &line) {
 			_baseUrl = QString("http://%1:%2").arg(host).arg(port);
 			_ready = true;
 			_restartAttempts = 0;
-			emit ready(_baseUrl, _token);
+			Q_EMIT ready(_baseUrl, _token);
 			return;
 		}
 	}
-	emit logLine(QString::fromUtf8(line));
+	Q_EMIT logLine(QString::fromUtf8(line));
 }
 
 void SidecarProcess::onFinished(int exitCode, QProcess::ExitStatus) {
@@ -136,7 +136,7 @@ void SidecarProcess::onFinished(int exitCode, QProcess::ExitStatus) {
 		_proc->deleteLater();
 		_proc = nullptr;
 	}
-	emit died(exitCode, QString::fromUtf8(tail.right(2048)));
+	Q_EMIT died(exitCode, QString::fromUtf8(tail.right(2048)));
 	scheduleRestart();
 }
 
