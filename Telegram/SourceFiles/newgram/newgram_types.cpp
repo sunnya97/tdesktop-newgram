@@ -5,7 +5,9 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #include "newgram/newgram_types.h"
 
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 #include <QtCore/QJsonValue>
 
 namespace Newgram {
@@ -22,10 +24,21 @@ QString ContentToDisplayJson(const QJsonValue &value) {
 	if (value.isNull() || value.isUndefined()) {
 		return QString();
 	}
-	return QString::fromUtf8(
-		QJsonDocument(value.isArray()
-			? QJsonDocument(value.toArray())
-			: QJsonDocument(ToObj(value))).toJson(QJsonDocument::Compact));
+	if (value.isBool()) {
+		return value.toBool() ? QStringLiteral("true") : QStringLiteral("false");
+	}
+	if (value.isDouble()) {
+		return QString::number(value.toDouble());
+	}
+	QJsonDocument doc;
+	if (value.isArray()) {
+		doc = QJsonDocument(value.toArray());
+	} else if (value.isObject()) {
+		doc = QJsonDocument(value.toObject());
+	} else {
+		return QString();
+	}
+	return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
 }
 
 } // namespace
