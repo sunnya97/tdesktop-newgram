@@ -5,11 +5,11 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #include "newgram/sidecar_settings.h"
 
-#include <QCoreApplication>
-#include <QDir>
-#include <QFileInfo>
-#include <QProcessEnvironment>
-#include <QStandardPaths>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtCore/QProcessEnvironment>
+#include <QtCore/QStandardPaths>
 
 namespace Newgram {
 

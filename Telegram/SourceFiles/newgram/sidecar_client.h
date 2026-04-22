@@ -7,9 +7,9 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 
 #include "newgram/newgram_types.h"
 
-#include <QJsonObject>
-#include <QObject>
-#include <QString>
+#include <QtCore/QJsonObject>
+#include <QtCore/QObject>
+#include <QtCore/QString>
 
 #include <memory>
 

@@ -5,8 +5,8 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #pragma once
 
-#include <QString>
-#include <QJsonObject>
+#include <QtCore/QString>
+#include <QtCore/QJsonObject>
 #include <variant>
 
 namespace Newgram {

@@ -5,11 +5,11 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #include "newgram/sidecar_process.h"
 
-#include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QStringList>
-#include <QUrl>
+#include <QtCore/QDebug>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+#include <QtCore/QStringList>
+#include <QtCore/QUrl>
 
 namespace Newgram {
 namespace {

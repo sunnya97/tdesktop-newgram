@@ -7,10 +7,10 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 
 #include "newgram/sidecar_settings.h"
 
-#include <QObject>
-#include <QProcess>
-#include <QString>
-#include <QTimer>
+#include <QtCore/QObject>
+#include <QtCore/QProcess>
+#include <QtCore/QString>
+#include <QtCore/QTimer>
 
 namespace Newgram {
 

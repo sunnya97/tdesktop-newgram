@@ -5,13 +5,13 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #include "newgram/sidecar_client.h"
 
-#include <QByteArray>
-#include <QJsonDocument>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QUrl>
-#include <QUrlQuery>
+#include <QtCore/QByteArray>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QUrl>
+#include <QtCore/QUrlQuery>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 
 namespace Newgram {
 namespace {

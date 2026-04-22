@@ -9,7 +9,7 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 #include "ui/boxes/confirm_box.h"
 #include "window/window_session_controller.h"
 
-#include <QDebug>
+#include <QtCore/QDebug>
 
 namespace Newgram {
 
