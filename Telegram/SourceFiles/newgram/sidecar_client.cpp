@@ -79,9 +79,8 @@ void TaskStream::handleReadyRead() {
 	_buffer.append(_reply->readAll());
 	for (const auto &frame : SplitSseFrames(_buffer)) {
 		const auto payload = ExtractDataPayload(frame);
-		if (payload.isEmpty()) continue;
-		if (auto parsed = ParseAgentEvent(payload); parsed.has_value()) {
-			Q_EMIT agentEvent(*parsed);
+		if (!payload.isEmpty()) {
+			Q_EMIT agentEventJson(payload);
 		}
 	}
 }
@@ -93,9 +92,7 @@ void TaskStream::handleFinished() {
 	for (const auto &frame : SplitSseFrames(_buffer)) {
 		const auto payload = ExtractDataPayload(frame);
 		if (!payload.isEmpty()) {
-			if (auto parsed = ParseAgentEvent(payload); parsed.has_value()) {
-				Q_EMIT agentEvent(*parsed);
-			}
+			Q_EMIT agentEventJson(payload);
 		}
 	}
 

@@ -5,8 +5,7 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 */
 #pragma once
 
-#include "newgram/newgram_types.h"
-
+#include <QtCore/QByteArray>
 #include <QtCore/QJsonObject>
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -19,8 +18,14 @@ class QNetworkReply;
 namespace Newgram {
 
 // One in-flight task stream. Constructed by SidecarClient::startTask; owns
-// its own QNetworkReply and surfaces AgentEvents as Qt signals on the UI
-// thread. Delete to cancel.
+// its own QNetworkReply and surfaces AgentEvent JSON payloads as Qt signals
+// on the UI thread. Delete to cancel.
+//
+// The signal carries the raw JSON bytes of each SSE-framed event rather than
+// the parsed std::variant — moc can't reliably parse discriminated-union
+// template types in signal parameters, and having the receiver call
+// Newgram::ParseAgentEvent() on the payload keeps the Qt metaobject surface
+// free of our variant types.
 class TaskStream : public QObject {
 	Q_OBJECT
 public:
@@ -28,7 +33,7 @@ public:
 	~TaskStream() override;
 
 Q_SIGNALS:
-	void agentEvent(Newgram::AgentEvent event);
+	void agentEventJson(QByteArray payload);
 	void finished();
 	void failed(QString reason);
 
