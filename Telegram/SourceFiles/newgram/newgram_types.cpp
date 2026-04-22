@@ -105,4 +105,4 @@ QString SummaryLabel(const AgentEvent &event) {
 }
 
 } // namespace Newgram
-// ci trigger ping
+

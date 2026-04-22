@@ -65,6 +65,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_session_settings.h"
 #include "menu/menu_mute.h"
 #include "menu/menu_ttl_validator.h"
+#include "newgram/summarize_action.h"
 #include "apiwrap.h"
 #include "mainwidget.h"
 #include "api/api_blocked_peers.h"
@@ -302,6 +303,7 @@ private:
 	void addToggleUnreadMark();
 	void addToggleArchive();
 	void addClearHistory();
+	void addSummarizeChat();
 	void addDeleteChat();
 	void addLeaveChat();
 	void addJoinChat();
@@ -1773,10 +1775,23 @@ void Filler::fillHistoryActions() {
 	addDirectMessages();
 	addExportChat();
 	addTranslate();
+	addSummarizeChat();
 	addReport();
 	addClearHistory();
 	addDeleteChat();
 	addLeaveChat();
+}
+
+void Filler::addSummarizeChat() {
+	if (!_peer) {
+		return;
+	}
+	_addAction(
+		QStringLiteral("Summarize chat (Newgram)"),
+		[controller = _controller, peer = _peer] {
+			Newgram::ShowSummarizeChatPlaceholder(controller, peer);
+		},
+		&st::menuIconInfo);
 }
 
 void Filler::fillProfileActions() {

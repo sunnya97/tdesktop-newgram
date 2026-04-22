@@ -1464,6 +1464,8 @@ PRIVATE
     newgram/sidecar_process.h
     newgram/sidecar_settings.cpp
     newgram/sidecar_settings.h
+    newgram/summarize_action.cpp
+    newgram/summarize_action.h
     overview/overview_checkbox.cpp
     overview/overview_checkbox.h
     overview/overview_layout.cpp
