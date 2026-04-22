@@ -1456,6 +1456,14 @@ PRIVATE
     mtproto/special_config_request.cpp
     mtproto/special_config_request.h
     mtproto/type_utils.h
+    newgram/newgram_types.cpp
+    newgram/newgram_types.h
+    newgram/sidecar_client.cpp
+    newgram/sidecar_client.h
+    newgram/sidecar_process.cpp
+    newgram/sidecar_process.h
+    newgram/sidecar_settings.cpp
+    newgram/sidecar_settings.h
     overview/overview_checkbox.cpp
     overview/overview_checkbox.h
     overview/overview_layout.cpp
