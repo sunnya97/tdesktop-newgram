@@ -38,9 +38,9 @@ public:
 		_webview->navigate(url);
 
 		sizeValue(
-		) | rpl::start_with_next([this](QSize size) {
-			if (auto *const widget = _webview->widget()) {
-				widget->setGeometry(QRect(QPoint(), size));
+		) | rpl::on_next([this](QSize size) {
+			if (auto *const w = _webview->widget()) {
+				w->setGeometry(QRect(QPoint(), size));
 			}
 		}, lifetime());
 	}
