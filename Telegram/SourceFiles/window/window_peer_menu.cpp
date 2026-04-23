@@ -1752,6 +1752,7 @@ void Filler::fillContextMenuActions() {
 			addBlockUser();
 		}
 	}
+	addSummarizeChat();
 	addClearHistory();
 	addDeleteChat();
 	addLeaveChat();
