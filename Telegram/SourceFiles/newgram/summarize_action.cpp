@@ -6,14 +6,15 @@ Newgram is licensed under the terms of the GPLv3; see LICENSE at repo root.
 #include "newgram/summarize_action.h"
 
 #include "data/data_peer.h"
+#include "main/main_session.h"
+#include "storage/storage_account.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/layers/generic_box.h"
 #include "ui/rp_widget.h"
 #include "webview/webview_embed.h"
+#include "webview/webview_interface.h"
 #include "window/window_session_controller.h"
 
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
 #include <QtCore/QProcessEnvironment>
 #include <QtCore/QUrl>
 #include <QtCore/QUrlQuery>
@@ -24,16 +25,25 @@ namespace {
 constexpr auto kPanelWidth = 720;
 constexpr auto kPanelHeight = 560;
 
+// Owns the Webview::Window and keeps its QWidget child filling the holder's
+// rect. Mirrors the ownership style of Iv::Controller / LocationPicker:
+// the Webview::Window is constructed with a parent RpWidget, which does the
+// reparenting itself — we just resize its child widget as our size changes.
 class WebviewHolder final : public Ui::RpWidget {
 public:
-	WebviewHolder(QWidget *parent, const QString &url)
+	WebviewHolder(
+			QWidget *parent,
+			Webview::StorageId storageId,
+			const QString &url)
 	: RpWidget(parent)
 	, _webview(std::make_unique<Webview::Window>(
 		this,
-		Webview::WindowConfig{ .safe = true })) {
-		if (auto *const widget = _webview->widget()) {
-			widget->setParent(this);
-			widget->show();
+		Webview::WindowConfig{
+			.storageId = std::move(storageId),
+			.safe = true,
+		})) {
+		if (auto *const w = _webview->widget()) {
+			w->show();
 		}
 		_webview->navigate(url);
 
@@ -49,12 +59,14 @@ private:
 	std::unique_ptr<Webview::Window> _webview;
 };
 
-[[nodiscard]] QString ResolveBaseUrl(const QProcessEnvironment &env) {
-	return env.value(QStringLiteral("NEWGRAM_SIDECAR_URL"));
+[[nodiscard]] QString ResolveBaseUrl() {
+	return QProcessEnvironment::systemEnvironment().value(
+		QStringLiteral("NEWGRAM_SIDECAR_URL"));
 }
 
-[[nodiscard]] QString ResolveToken(const QProcessEnvironment &env) {
-	return env.value(QStringLiteral("NEWGRAM_SIDECAR_TOKEN"));
+[[nodiscard]] QString ResolveToken() {
+	return QProcessEnvironment::systemEnvironment().value(
+		QStringLiteral("NEWGRAM_SIDECAR_TOKEN"));
 }
 
 [[nodiscard]] QString BuildUiUrl(
@@ -77,6 +89,19 @@ private:
 	return url.toString();
 }
 
+[[nodiscard]] QString SetupMessage() {
+	return QStringLiteral(
+		"Newgram sidecar not configured.\n\n"
+		"Run in a terminal:\n"
+		"  cd newgram/sidecar\n"
+		"  NEWGRAM_SIDECAR_TOKEN=demo \\\n"
+		"      uv run newgram-sidecar --port 8765 --token demo\n\n"
+		"Then relaunch Telegram with:\n"
+		"  NEWGRAM_SIDECAR_URL=http://127.0.0.1:8765 \\\n"
+		"  NEWGRAM_SIDECAR_TOKEN=demo \\\n"
+		"      open -a Telegram.app");
+}
+
 } // namespace
 
 void ShowSummarizeChatPlaceholder(
@@ -86,38 +111,40 @@ void ShowSummarizeChatPlaceholder(
 		return;
 	}
 
-	const auto env = QProcessEnvironment::systemEnvironment();
-	const auto baseUrl = ResolveBaseUrl(env);
+	const auto baseUrl = ResolveBaseUrl();
 	if (baseUrl.isEmpty()) {
-		controller->show(Ui::MakeInformBox(QStringLiteral(
-			"Newgram sidecar not configured.\n\n"
-			"Run in a terminal:\n"
-			"  NEWGRAM_SIDECAR_TOKEN=demo \\\n"
-			"      uv --directory <path-to>/newgram/sidecar run "
-			"newgram-sidecar --port 8765 --token demo\n\n"
-			"Then relaunch Telegram with:\n"
-			"  NEWGRAM_SIDECAR_URL=http://127.0.0.1:8765 \\\n"
-			"  NEWGRAM_SIDECAR_TOKEN=demo \\\n"
-			"      open -a Telegram.app")));
+		controller->show(Ui::MakeInformBox(SetupMessage()));
 		return;
 	}
 
+	// lib_webview can fail to initialize on some macOS configurations
+	// (missing WKWebView framework entitlements, etc.). Guard before we
+	// construct anything that tries to navigate.
+	const auto available = Webview::Availability();
+	if (available.error != Webview::Available::Error::None) {
+		controller->show(Ui::MakeInformBox(
+			QStringLiteral("Newgram webview unavailable on this system.")));
+		return;
+	}
+
+	auto storageId = controller->session().local().resolveStorageIdOther();
 	const auto title = QStringLiteral("Summarize %1").arg(peer->name());
 	const auto chatId = QString::number(peer->id.value);
 	const auto url = BuildUiUrl(
 		baseUrl,
-		ResolveToken(env),
+		ResolveToken(),
 		QStringLiteral("summarize_chat"),
 		chatId,
 		title);
 
-	controller->show(Box([url, title](not_null<Ui::GenericBox*> box) {
+	controller->show(Box([title, url, storageId = std::move(storageId)](
+			not_null<Ui::GenericBox*> box) mutable {
 		box->setTitle(rpl::single(title));
 		box->setNoContentMargin(true);
 		box->setWidth(kPanelWidth);
 
 		const auto holder = box->addRow(
-			object_ptr<WebviewHolder>(box, url),
+			object_ptr<WebviewHolder>(box, std::move(storageId), url),
 			QMargins());
 		holder->resize(kPanelWidth, kPanelHeight);
 
